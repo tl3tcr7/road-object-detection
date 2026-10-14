@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Road Object Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <header class="top">
+    <div class="top__inner">
+      <h1>Road Object Detection</h1>
+      <p>Upload a street photo. The model finds 25 kinds of road objects and reads any text on them, in Arabic and English.</p>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ─── Left: input ─── -->
+    <section class="panel panel--input" aria-label="Upload">
+      <label id="dropzone" class="dropzone" for="fileInput" tabindex="0">
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden>
+        <div id="dropEmpty" class="dropzone__empty">
+          <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <strong>Drop an image here</strong>
+          <span>or click to choose a file (JPG, PNG, WEBP, up to 15 MB)</span>
+        </div>
+        <img id="previewImg" class="dropzone__preview" alt="Selected image preview" hidden>
+      </label>
+
+      <div class="control">
+        <div class="control__row">
+          <label for="conf">Confidence threshold</label>
+          <output id="confOut">{{ '%.2f' % default_conf }}</output>
+        </div>
+        <input id="conf" type="range" min="0.05" max="0.95" step="0.05" value="{{ default_conf }}">
+        <p class="hint">Lower values find more objects but add more false positives.</p>
+      </div>
+
+      <label class="switch">
+        <input id="ocrToggle" type="checkbox" checked>
+        <span class="switch__track"><span class="switch__thumb"></span></span>
+        <span class="switch__text">
+          <strong>Read text (OCR)</strong>
+          <small>Runs EasyOCR on every detected box. Slower on the first request.</small>
+        </span>
+      </label>
+
+      <button id="runBtn" class="btn" type="button" disabled>Detect objects</button>
+      <p id="error" class="error" role="alert" hidden></p>
+    </section>
+
+    <!-- ─── Right: results ─── -->
+    <section class="panel panel--output" aria-label="Results" aria-live="polite">
+
+      <div id="empty" class="empty">
+        <p>Results appear here.</p>
+        <p class="hint">Choose an image and select <em>Detect objects</em>.</p>
+      </div>
+
+      <div id="loading" class="loading" hidden>
+        <div class="spinner" aria-hidden="true"></div>
+        <p id="loadingText">Detecting objects…</p>
+      </div>
+
+      <div id="results" hidden>
+        <div class="result-image">
+          <img id="resultImg" alt="Image with detected objects outlined">
+        </div>
+
+        <div class="stats">
+          <div><span id="statCount">0</span><small>objects found</small></div>
+          <div><span id="statClasses">0</span><small>classes</small></div>
+          <div><span id="statText">0</span><small>with text</small></div>
+        </div>
+
+        <h2>Objects by class</h2>
+        <ul id="chips" class="chips"></ul>
+
+        <h2>All detections</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Class</th><th>Confidence</th><th>Text found</th></tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
